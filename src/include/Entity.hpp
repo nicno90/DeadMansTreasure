@@ -14,6 +14,7 @@ class Entity{
         Entity(Vector2f p_pos, SDL_Texture* p_texture);
         void init();
         Vector2f getPos();
+        SDL_Rect* getRect();
         SDL_Texture* getTexture();
         SDL_Rect getCurrentFrame();
         void move(float px, float py);
@@ -21,3 +22,33 @@ class Entity{
         
 };
 
+class Agent: Entity{
+    private:
+        float health;
+        int level;
+    public:
+        Agent(Vector2f p_pos, SDL_Texture* p_texture) : Entity(p_pos, p_texture){};
+        float getHealth();
+        int getLevel();
+        bool hit(int damage);
+
+};
+
+class Player: Agent{
+    private:
+        int coins = 0;
+        float xp = 0;
+
+    public:
+        Player();
+        int getCoins(){return coins;};
+        float getXP(){return xp;};
+        void add_coins(int p_coins){coins += p_coins;};
+        void add_xp(float p_xp){xp += p_xp;};
+
+};
+
+class Floor: Entity{
+    private:
+
+};

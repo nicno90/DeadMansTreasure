@@ -9,3 +9,8 @@ void Vector2f::adjust(Vector2f p_v){
     x += p_v.x;
     y += p_v.y;
 }
+
+void Vector2f::reset(){
+    x = 0;
+    y = 0;
+}
