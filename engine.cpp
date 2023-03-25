@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <vector>
+#include <algorithm>
 
 #include "Engine.hpp"
 #include "RenderWindow.hpp"
@@ -20,15 +21,29 @@ GameEngine::GameEngine(RenderWindow* p_window, Player* p_player)
 
     // player = Entity(Vector2f(400, 300), knight);
     agents = {
-        Agent(Vector2f(350, 250), textures[T_VIKING]),
+        Agent(Vector2f(350, 300), textures[T_VIKING]),
     };
     floors = {
-        
         // Floor(Vector2f(350, 250), textures[T_BIG_OPENING]),
-        Floor(Vector2f(350, 300), textures[T_BIG_OPENING]),
-        Floor(Vector2f(400, 392), textures[T_VERTICAL_PATH]),
-        Floor(Vector2f(400, 215), textures[T_VERTICAL_PATH]),
+        Floor(Vector2f(400, 435), textures[T_VERTICAL_PATH], FT_V_HALL_BOTTOM),
+        Floor(Vector2f(400, 235), textures[T_HORIZONTAL_PATH], FT_H_HALL_LEFT),
+        Floor(Vector2f(438, 235), textures[T_HORIZONTAL_PATH], FT_H_HALL_RIGHT),
+        Floor(Vector2f(400, 245), textures[T_VERTICAL_PATH], FT_V_HALL_TOP),
+        Floor(Vector2f(480, 340), textures[T_HORIZONTAL_PATH], FT_H_HALL_RIGHT),
+        Floor(Vector2f(300, 340), textures[T_HORIZONTAL_PATH], FT_H_HALL_LEFT),
+        Floor(Vector2f(350, 300), textures[T_BIG_OPENING], FT_BIG_AREA),
     };
+    Entity* entities_arr[1 + sizeof(floors) + sizeof(agents)];
+    
+    entities_arr[0] = player;
+    for (int i = 1; i < 1 + sizeof(floors); i ++){
+        entities_arr[i] = &floors[i-1];
+    }
+    for (int i = 1 + sizeof(floors); i < 1 + sizeof(floors) + sizeof(agents); i++){
+        entities_arr[i] = &agents[i-1-sizeof(floors)];
+    }
+    std::vector<Entity*> entities(entities_arr, entities_arr + (sizeof(entities_arr) / sizeof(entities_arr[0])));
+    std::sort(entities.begin(), entities.end());
     
 }
 
@@ -75,12 +90,21 @@ int GameEngine::startGame(){
 }
 
 void GameEngine::init_textures(){
+    textures[T_KNIGHT] = player->getTexture();
+    printf("");
     textures[T_BIG_OPENING] = window->loadTexture("res/images/big_opening.png");
+    printf("");
     textures[T_VERTICAL_PATH] = window->loadTexture("res/images/vertical_path.png");
-    // textures[T_HORIZONTAL_PATH] = window->loadTexture("res/images/horizontal_path.png"); Not why sure why this crashes it
+    printf("");
     textures[T_VIKING] = window->loadTexture("res/images/viking.png");
-    textures[T_KNIGHT] = window->loadTexture("res/images/knight.png");
-}
+    // printf("");
+    // textures[T_CHEST] = window->loadTexture("res/images/chest.png");
+    // printf("");
+    // textures[T_HORIZONTAL_PATH] = window->loadTexture("res/images/horizontal_path.png"); // Not sure why this crashes it
+    printf("");
+    // textures[T_BL_CORNER] = window->loadTexture("res/mages/bl_corner.png");
+    printf("");
+    }
 
 void GameEngine::init_directions(){
     float v = 1.0;
@@ -107,6 +131,7 @@ bool GameEngine::readInput(SDL_Event* windowEvent){
                 break;
             case SDLK_ESCAPE:
                 setKey(K_ESC, windowEvent);
+                return false;
         }
         if (windowEvent->type == SDL_QUIT){
             return false;

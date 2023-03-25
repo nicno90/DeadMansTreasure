@@ -35,6 +35,14 @@ void Entity::move(Vector2f p_v){
 }
 
 
+bool Entity::inFront(Entity* e1, Entity* e2){
+    return e1->getPos()->x > e2->getPos()->y; 
+}
+
+bool Entity::operator < (Entity& e){
+    return e.getPos()->y > Entity::getPos()->y;
+}
+
 // Agent;
 
 void Agent::get_adjusted_rect(Vector2f* direction){
@@ -49,11 +57,9 @@ void Agent::get_adjusted_rect(Vector2f* direction){
 bool Floor::check_collision(SDL_Rect* adj_player){
     
     
-    SDL_Rect floorRec = {(int)getPos()->x, (int)getPos()->y, getRect()->w, getRect()->h};
+    SDL_Rect floorRec = {(int)getPos()->x + x_mod(), (int)getPos()->y - y_mod(), getRect()->w, getRect()->h};
 
-    printf("{%d, %d, %d, %d}\n", adj_player->x, adj_player->y, adj_player->w, adj_player->h);
-    printf("{%d, %d, %d, %d}\n\n\n", floorRec.x, floorRec.y, floorRec.w, floorRec.h);
-
+    // printf("Check collision\n");
 
     if (!(floorRec.x < adj_player->x) && !(ignore_left_collison() && !(floorRec.x > adj_player->x + adj_player->w))){
         return false;
@@ -69,11 +75,12 @@ bool Floor::check_collision(SDL_Rect* adj_player){
     }
 
     return true;
-    // return ((floorRec.x < adj_player->x && 
-    //         adj_player->x + adj_player->w < floorRec.x + floorRec.w) &&
-    //         (floorRec.y < adj_player->y && 
-    //         adj_player->y + adj_player->h < floorRec.y + floorRec.h));
 }
+
+bool Floor::operator < (Floor& f){
+    return f.getPos()->y > Entity::getPos()->y;
+}
+
 
 bool Floor::ignore_top_collison(){
     switch (fType) {
@@ -82,6 +89,8 @@ bool Floor::ignore_top_collison(){
         case FT_BL_CORNER:
             return true;
         case FT_BR_CORNER:
+            return true;
+        case FT_V_HALL_BOTTOM:
             return true;
     }
     return false;
@@ -94,6 +103,8 @@ bool Floor::ignore_bottom_collison(){
             return true;
         case FT_TR_CORNER:
             return true;
+        case FT_V_HALL_TOP:
+            return true;
     }
     return false;
 }
@@ -104,6 +115,8 @@ bool Floor::ignore_left_collison(){
         case FT_BR_CORNER:
             return true;
         case FT_TR_CORNER:
+            return true;
+        case FT_H_HALL_RIGHT:
             return true;
     }
     return false;
@@ -116,6 +129,23 @@ bool Floor::ignore_right_collison(){
             return true;
         case FT_TL_CORNER:
             return true;
+        case FT_H_HALL_LEFT:
+            return true;
     }
     return false;
+}
+
+int Floor::x_mod(){
+    switch (fType){
+        default:
+            return 3;
+    }
+}
+
+int Floor::y_mod(){
+    switch (fType){
+        default:
+            return 20;
+    }
+    return 0;
 }

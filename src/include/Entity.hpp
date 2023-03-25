@@ -14,7 +14,9 @@ enum Texture {
     T_KNIGHT,
     T_BIG_OPENING,
     T_VERTICAL_PATH,
-    T_HORIZONTAL_PATH
+    T_HORIZONTAL_PATH,
+    T_BL_CORNER,
+    T_CHEST
 };
 
 class Entity{
@@ -24,13 +26,15 @@ class Entity{
         SDL_Texture* texture;
     public:
         Entity(Vector2f p_pos, SDL_Texture* p_texture);
-        Vector2f* getPos();
+        virtual Vector2f* getPos();
         SDL_Rect* getRect();
         SDL_Texture* getTexture();
+        void setTexture(SDL_Texture* p_texture);
         SDL_Rect getCurrentFrame();
         void move(float px, float py);
         void move(Vector2f p_v);
-        
+        static bool inFront(Entity* e1, Entity* e2);
+        virtual bool operator <(Entity& e);
 };
 
 class Agent: public Entity{
@@ -53,6 +57,7 @@ class Player: public Agent{
 
     public:
         Player(SDL_Texture* p_texture): Agent(Vector2f(400, 300), p_texture){};
+        void setTexture(SDL_Texture* p_texture){setTexture(p_texture);};
         int getCoins(){return coins;};
         float getXP(){return xp;};
         void add_coins(int p_coins){coins += p_coins;};
@@ -67,7 +72,11 @@ enum FloorType{
     FT_BLANK,
     FT_BIG_AREA,
     FT_V_HALL,
+    FT_V_HALL_TOP,
+    FT_V_HALL_BOTTOM,
     FT_H_HALL,
+    FT_H_HALL_LEFT,
+    FT_H_HALL_RIGHT,
     FT_TL_CORNER, 
     FT_TR_CORNER,
     FT_BR_CORNER,
@@ -81,10 +90,18 @@ class Floor: public Entity{
     public:
         Floor(Vector2f p_pos, SDL_Texture* p_texture): Entity(p_pos, p_texture), fType(FT_BLANK){};
         Floor(Vector2f p_pos, SDL_Texture* p_texture, FloorType p_fType): Entity(p_pos, p_texture), fType(p_fType){};
+        
         void conform_to_type();
         bool check_collision(SDL_Rect* adj_player);
+        virtual bool operator < (Floor& f);
+        
+        FloorType getType(){return fType;};
+        
         bool ignore_top_collison();
         bool ignore_bottom_collison();
         bool ignore_left_collison();
         bool ignore_right_collison();
+        int x_mod();
+        int y_mod();
+        
 };

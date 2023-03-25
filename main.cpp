@@ -20,7 +20,6 @@ int main(int argc, char *argv[]){
     if (!IMG_Init(IMG_INIT_PNG))
         std::cout << "IMG_Init failed. ERROR: " << SDL_GetError() << std::endl;
     RenderWindow window = RenderWindow("Dead Man's Treasure", WIDTH, HEIGHT);
-    
     // this needs to change when there is a main menue
     Player player = Player(window.loadTexture("res/images/knight.png"));
 
