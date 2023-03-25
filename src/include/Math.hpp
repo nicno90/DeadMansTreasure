@@ -9,6 +9,8 @@ struct Vector2f {
 
     void adjust(float p_x, float p_y);
     void adjust(Vector2f p_v);
+    void neg_adjust(float p_x, float p_y);
+    void neg_adjust(Vector2f p_v);
     void reset();
     void print(){
         std::cout << x << ", " << y << std::endl;

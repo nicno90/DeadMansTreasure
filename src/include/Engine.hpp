@@ -26,15 +26,23 @@ enum keyPressed {
 class GameEngine {
     private:
         RenderWindow* window;
-        Entity* player;
-        std::vector<Entity> entities;
+        Player* player;
+        Vector2f directions[4];
+        std::vector<Agent> agents;
+        std::vector<Floor> floors;
+        SDL_Texture* textures[sizeof(Texture)];
+        void init_textures();
+        void init_directions();
         bool inputs_pressed[sizeof(keyPressed)] = {false};
         void setKey(keyPressed key, SDL_Event* windowEvent);
         bool readInput(SDL_Event* windowEvent);
         void check_movement(Vector2f* pos_adj);
         void refresh_timing(int* startTicks, float* newTime, float* currentTime, float* frameTime, float* accumulator);
+        void render_entities(std::vector<Entity>* p_entity);
+
+        bool check_valid_move(Vector2f direction);
 
     public:
-        GameEngine(RenderWindow* window, Entity* p_player);
+        GameEngine(RenderWindow* window, Player* p_player);
         int startGame();
 };

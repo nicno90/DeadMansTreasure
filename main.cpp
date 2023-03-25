@@ -21,8 +21,9 @@ int main(int argc, char *argv[]){
         std::cout << "IMG_Init failed. ERROR: " << SDL_GetError() << std::endl;
     RenderWindow window = RenderWindow("Dead Man's Treasure", WIDTH, HEIGHT);
     
-    SDL_Texture* knight = window.loadTexture("res/images/knight.png");
-    Entity player = Entity(Vector2f(400, 300), knight);
+    // this needs to change when there is a main menue
+    Player player = Player(window.loadTexture("res/images/knight.png"));
+
     GameEngine gameInstance = GameEngine(&window, &player);
     gameInstance.startGame();
     

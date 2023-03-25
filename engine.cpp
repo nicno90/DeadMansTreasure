@@ -12,18 +12,82 @@
 
 
 
-GameEngine::GameEngine(RenderWindow* p_window, Entity* p_player):
-window(p_window), player(p_player){
+GameEngine::GameEngine(RenderWindow* p_window, Player* p_player)
+:window(p_window), player(p_player){
 
-    SDL_Texture* big_opening = window->loadTexture("res/images/big_opening.png");
-    SDL_Texture* viking = window->loadTexture("res/images/viking.png");
+    init_textures();
+    init_directions();
 
     // player = Entity(Vector2f(400, 300), knight);
-    entities = {
-        
-        Entity(Vector2f(350, 250), big_opening),
-        Entity(Vector2f(350, 250), viking),
+    agents = {
+        Agent(Vector2f(350, 250), textures[T_VIKING]),
     };
+    floors = {
+        
+        // Floor(Vector2f(350, 250), textures[T_BIG_OPENING]),
+        Floor(Vector2f(350, 300), textures[T_BIG_OPENING]),
+        Floor(Vector2f(400, 392), textures[T_VERTICAL_PATH]),
+        Floor(Vector2f(400, 215), textures[T_VERTICAL_PATH]),
+    };
+    
+}
+
+int GameEngine::startGame(){
+    bool gameRunning = true;
+    SDL_Event windowEvent;
+    const float timeStep = 0.01f;
+    float accumulator = 0.0f;
+    float currentTime =  utils::hireTimeInSeconds();
+
+    int startTicks;
+    float newTime;
+    float frameTime;
+
+    Vector2f pos_delta = Vector2f();
+
+    // Game Loop:
+    while (gameRunning){
+
+        refresh_timing(&startTicks, &newTime, &currentTime, &frameTime, &accumulator);
+        
+        while (accumulator >= timeStep){
+            gameRunning = readInput(&windowEvent);
+            accumulator -= timeStep;
+        }
+        
+        check_movement(&pos_delta);
+
+        window->clear();
+        for (Floor& f : floors){
+            f.move(pos_delta);
+            window->render(f);
+        }
+        for (Agent& f : agents){
+            f.move(pos_delta);
+            window->render(f);
+        }
+        window->render(*player);
+        window->display();
+    }
+    window->cleanUp();
+    SDL_Quit();
+    return EXIT_SUCCESS;
+}
+
+void GameEngine::init_textures(){
+    textures[T_BIG_OPENING] = window->loadTexture("res/images/big_opening.png");
+    textures[T_VERTICAL_PATH] = window->loadTexture("res/images/vertical_path.png");
+    // textures[T_HORIZONTAL_PATH] = window->loadTexture("res/images/horizontal_path.png"); Not why sure why this crashes it
+    textures[T_VIKING] = window->loadTexture("res/images/viking.png");
+    textures[T_KNIGHT] = window->loadTexture("res/images/knight.png");
+}
+
+void GameEngine::init_directions(){
+    float v = 1.0;
+    directions[K_UP] = Vector2f(0.0, 1 * (v));
+    directions[K_DOWN] = Vector2f(0.0, -1 * (v));
+    directions[K_LEFT] = Vector2f(1 * (v), 0.0);
+    directions[K_RIGHT] = Vector2f(-1 * (v), 0.0);
 }
 
 bool GameEngine::readInput(SDL_Event* windowEvent){
@@ -57,18 +121,18 @@ void GameEngine::setKey(keyPressed key, SDL_Event* windowEvent){
 
 void GameEngine::check_movement(Vector2f* pos_delta){
     pos_delta->reset();
-    if (inputs_pressed[K_UP]){
-            pos_delta->adjust(0.0, 1.0);
-        }
-        if (inputs_pressed[K_DOWN]){
-            pos_delta->adjust(0.0, -1.0);
-        }
-        if (inputs_pressed[K_LEFT]){
-            pos_delta->adjust(1.0, 0.0);
-        }
-        if (inputs_pressed[K_RIGHT]){
-            pos_delta->adjust(-1.0, 0.0);
-        }
+    if (inputs_pressed[K_UP] && check_valid_move(directions[K_UP])) {
+        pos_delta->adjust(directions[K_UP]);
+    }
+    if (inputs_pressed[K_DOWN] && check_valid_move(directions[K_DOWN])){
+        pos_delta->adjust(directions[K_DOWN]);
+    }
+    if (inputs_pressed[K_LEFT] && check_valid_move(directions[K_LEFT])){
+        pos_delta->adjust(directions[K_LEFT]);
+    }
+    if (inputs_pressed[K_RIGHT] && check_valid_move(directions[K_RIGHT])){
+        pos_delta->adjust(directions[K_RIGHT]);
+    }
 }
 
 void GameEngine::refresh_timing(int* startTicks, float* newTime, float* currentTime, float* frameTime, float* accumulator){
@@ -76,46 +140,22 @@ void GameEngine::refresh_timing(int* startTicks, float* newTime, float* currentT
     *newTime = utils::hireTimeInSeconds();
     *frameTime = *newTime - *currentTime;
     *currentTime = *newTime;
-
     *accumulator += *frameTime;
 }
 
-int GameEngine::startGame(){
-    bool gameRunning = true;
-    SDL_Event windowEvent;
-    const float timeStep = 0.01f;
-    float accumulator = 0.0f;
-    float currentTime =  utils::hireTimeInSeconds();
 
-    int startTicks;
-    float newTime;
-    float frameTime;
-
-    Vector2f pos_delta = Vector2f();
-
-    // Game Loop:
-    while (gameRunning){
-
-        refresh_timing(&startTicks, &newTime, &currentTime, &frameTime, &accumulator);
-        
-        while (accumulator >= timeStep){
-            gameRunning = readInput(&windowEvent);
-            accumulator -= timeStep;
+bool GameEngine::check_valid_move(Vector2f direction){
+    SDL_Rect adjustedRect = {
+        (int)(player->getPos()->x - (direction.x) + 8), (int)(player->getPos()->y - (direction.y)), 
+        player->getRect()->w - 8, player->getRect()->h
+    };
+    for (Floor& f : floors)
+    {
+        if (f.check_collision(&adjustedRect))
+        {
+            return true;
         }
-        
-        check_movement(&pos_delta);
-
-        window->clear();
-        for (Entity& e : entities){
-            e.move(pos_delta);
-            window->render(e);
-        }
-        window->render(*player);
-        window->display();
     }
-    window->cleanUp();
-    SDL_Quit();
-    return EXIT_SUCCESS;
+    return false;
 }
-
 
