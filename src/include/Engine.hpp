@@ -19,7 +19,9 @@ enum keyPressed {
     K_W,
     K_S,
     K_A,
-    K_D
+    K_D,
+    
+    K_LAST
 };
 
 
@@ -30,10 +32,10 @@ class GameEngine {
         Vector2f directions[4];
         std::vector<Agent> agents;
         std::vector<Floor> floors;
-        SDL_Texture* textures[sizeof(Texture)];
+        SDL_Texture* textures[T_LAST];
         void init_textures();
         void init_directions();
-        bool inputs_pressed[sizeof(keyPressed)] = {false};
+        bool inputs_pressed[K_LAST] = {false};
         void setKey(keyPressed key, SDL_Event* windowEvent);
         bool readInput(SDL_Event* windowEvent);
         void check_movement(Vector2f* pos_adj);

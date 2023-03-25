@@ -25,13 +25,16 @@ GameEngine::GameEngine(RenderWindow* p_window, Player* p_player)
     };
     floors = {
         // Floor(Vector2f(350, 250), textures[T_BIG_OPENING]),
-        Floor(Vector2f(400, 435), textures[T_VERTICAL_PATH], FT_V_HALL_BOTTOM),
         Floor(Vector2f(400, 235), textures[T_HORIZONTAL_PATH], FT_H_HALL_LEFT),
         Floor(Vector2f(438, 235), textures[T_HORIZONTAL_PATH], FT_H_HALL_RIGHT),
         Floor(Vector2f(400, 245), textures[T_VERTICAL_PATH], FT_V_HALL_TOP),
         Floor(Vector2f(480, 340), textures[T_HORIZONTAL_PATH], FT_H_HALL_RIGHT),
         Floor(Vector2f(300, 340), textures[T_HORIZONTAL_PATH], FT_H_HALL_LEFT),
         Floor(Vector2f(350, 300), textures[T_BIG_OPENING], FT_BIG_AREA),
+        Floor(Vector2f(450, 300), textures[T_CHEST], FT_BLANK),
+        Floor(Vector2f(400, 435), textures[T_VERTICAL_PATH], FT_V_HALL),
+        Floor(Vector2f(408, 490), textures[T_BL_CORNER], FT_BL_CORNER),
+        Floor(Vector2f(436, 493), textures[T_HORIZONTAL_PATH], FT_H_HALL_RIGHT),
     };
     Entity* entities_arr[1 + sizeof(floors) + sizeof(agents)];
     
@@ -91,19 +94,13 @@ int GameEngine::startGame(){
 
 void GameEngine::init_textures(){
     textures[T_KNIGHT] = player->getTexture();
-    printf("");
     textures[T_BIG_OPENING] = window->loadTexture("res/images/big_opening.png");
-    printf("");
     textures[T_VERTICAL_PATH] = window->loadTexture("res/images/vertical_path.png");
-    printf("");
     textures[T_VIKING] = window->loadTexture("res/images/viking.png");
-    // printf("");
-    // textures[T_CHEST] = window->loadTexture("res/images/chest.png");
-    // printf("");
-    // textures[T_HORIZONTAL_PATH] = window->loadTexture("res/images/horizontal_path.png"); // Not sure why this crashes it
-    printf("");
-    // textures[T_BL_CORNER] = window->loadTexture("res/mages/bl_corner.png");
-    printf("");
+    textures[T_CHEST] = window->loadTexture("res/images/chest.png");
+    textures[T_HORIZONTAL_PATH] = window->loadTexture("res/images/horizontal_path.png");
+    textures[T_BL_CORNER] = window->loadTexture("res/images/bl_corner.png");
+    textures[T_TL_CORNER] = window->loadTexture("res/images/tl_corner.png");
     }
 
 void GameEngine::init_directions(){

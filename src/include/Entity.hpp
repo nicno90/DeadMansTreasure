@@ -16,7 +16,12 @@ enum Texture {
     T_VERTICAL_PATH,
     T_HORIZONTAL_PATH,
     T_BL_CORNER,
-    T_CHEST
+    T_TL_CORNER,
+    T_TR_CORNER,
+    T_BR_CORNER,
+    T_CHEST,
+
+    T_LAST
 };
 
 class Entity{
