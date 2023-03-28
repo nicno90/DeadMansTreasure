@@ -30,9 +30,11 @@ class GameEngine {
         RenderWindow* window;
         Player* player;
         Vector2f directions[4];
-        std::vector<Agent> agents;
+        std::vector<Agent*> agents;
+        Agent viking_chad;
         std::vector<Floor> floors;
         SDL_Texture* textures[T_LAST];
+        // void init_agents();
         void init_textures();
         void init_directions();
         bool inputs_pressed[K_LAST] = {false};
@@ -41,7 +43,7 @@ class GameEngine {
         void check_movement(Vector2f* pos_adj);
         void refresh_timing(int* startTicks, float* newTime, float* currentTime, float* frameTime, float* accumulator);
         void render_entities(std::vector<Entity>* p_entity);
-
+        void order_agents();
         bool check_valid_move(Vector2f direction);
 
     public:

@@ -24,6 +24,7 @@ enum Texture {
     T_LAST
 };
 
+
 class Entity{
     private:
         Vector2f pos;
@@ -73,6 +74,15 @@ class Player: public Agent{
 };
 
 
+enum AttachmentPoint{
+    AP_TOP,
+    AP_BOTTOM,
+    AP_LEFT,
+    AP_RIGHT,
+    AP_NULL
+};
+
+
 enum FloorType{
     FT_BLANK,
     FT_BIG_AREA,
@@ -92,13 +102,15 @@ enum FloorType{
 class Floor: public Entity{
     private:
         FloorType fType;
+        Vector2f calc_position(Floor* parent, AttachmentPoint p_attachSide, AttachmentPoint p_attachPoint);
     public:
         Floor(Vector2f p_pos, SDL_Texture* p_texture): Entity(p_pos, p_texture), fType(FT_BLANK){};
         Floor(Vector2f p_pos, SDL_Texture* p_texture, FloorType p_fType): Entity(p_pos, p_texture), fType(p_fType){};
+        Floor(SDL_Texture* p_texture, FloorType p_fType, AttachmentPoint p_attachSide, Floor* parent);
+        Floor(SDL_Texture* p_texture, FloorType p_fType, AttachmentPoint p_attachSide, AttachmentPoint p_attachPoint, Floor* parent);
         
         void conform_to_type();
         bool check_collision(SDL_Rect* adj_player);
-        virtual bool operator < (Floor& f);
         
         FloorType getType(){return fType;};
         
@@ -108,5 +120,7 @@ class Floor: public Entity{
         bool ignore_right_collison();
         int x_mod();
         int y_mod();
+        bool is_vertical();
+        bool is_horizontal();
         
 };

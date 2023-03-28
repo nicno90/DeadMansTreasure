@@ -14,40 +14,31 @@
 
 
 GameEngine::GameEngine(RenderWindow* p_window, Player* p_player)
-:window(p_window), player(p_player){
+:window(p_window), player(p_player),  viking_chad(Agent(Vector2f(350, 300), textures[T_VIKING])){
 
     init_textures();
     init_directions();
 
-    // player = Entity(Vector2f(400, 300), knight);
+    viking_chad = Agent(Vector2f(350, 300), textures[T_VIKING]);
     agents = {
-        Agent(Vector2f(350, 300), textures[T_VIKING]),
+        player,
+        &viking_chad,
     };
     floors = {
-        // Floor(Vector2f(350, 250), textures[T_BIG_OPENING]),
-        Floor(Vector2f(400, 235), textures[T_HORIZONTAL_PATH], FT_H_HALL_LEFT),
-        Floor(Vector2f(438, 235), textures[T_HORIZONTAL_PATH], FT_H_HALL_RIGHT),
-        Floor(Vector2f(400, 245), textures[T_VERTICAL_PATH], FT_V_HALL_TOP),
-        Floor(Vector2f(480, 340), textures[T_HORIZONTAL_PATH], FT_H_HALL_RIGHT),
-        Floor(Vector2f(300, 340), textures[T_HORIZONTAL_PATH], FT_H_HALL_LEFT),
-        Floor(Vector2f(350, 300), textures[T_BIG_OPENING], FT_BIG_AREA),
-        Floor(Vector2f(450, 300), textures[T_CHEST], FT_BLANK),
-        Floor(Vector2f(400, 435), textures[T_VERTICAL_PATH], FT_V_HALL),
-        Floor(Vector2f(408, 490), textures[T_BL_CORNER], FT_BL_CORNER),
-        Floor(Vector2f(436, 493), textures[T_HORIZONTAL_PATH], FT_H_HALL_RIGHT),
+        Floor(Vector2f(350, 250), textures[T_BIG_OPENING], FT_BIG_AREA), // Base floor
     };
-    Entity* entities_arr[1 + sizeof(floors) + sizeof(agents)];
+    floors.push_back(Floor(textures[T_HORIZONTAL_PATH], FT_H_HALL, AP_RIGHT, &floors[0]));
+    floors.push_back(Floor(textures[T_HORIZONTAL_PATH], FT_H_HALL_LEFT, AP_LEFT, &floors[0]));
+    floors.push_back(Floor(textures[T_VERTICAL_PATH], FT_V_HALL_TOP, AP_TOP, &floors[0]));
+    floors.push_back(Floor(textures[T_VERTICAL_PATH], FT_V_HALL, AP_BOTTOM, &floors[0]));
+    floors.push_back(Floor(textures[T_VERTICAL_PATH], FT_V_HALL_BOTTOM, AP_BOTTOM, &floors[floors.size()-1]));
+    floors.push_back(Floor(textures[T_HORIZONTAL_PATH], FT_H_HALL, AP_RIGHT, AP_BOTTOM, &floors[floors.size()-1]));
+    floors.push_back(Floor(textures[T_BIG_OPENING], FT_BIG_AREA, AP_RIGHT, &floors[floors.size()-1]));
+    floors.push_back(Floor(textures[T_VERTICAL_PATH], FT_V_HALL, AP_TOP, &floors[floors.size()-1]));
+    floors.push_back(Floor(textures[T_VERTICAL_PATH], FT_V_HALL_TOP, AP_TOP, &floors[floors.size()-1]));
     
-    entities_arr[0] = player;
-    for (int i = 1; i < 1 + sizeof(floors); i ++){
-        entities_arr[i] = &floors[i-1];
-    }
-    for (int i = 1 + sizeof(floors); i < 1 + sizeof(floors) + sizeof(agents); i++){
-        entities_arr[i] = &agents[i-1-sizeof(floors)];
-    }
-    std::vector<Entity*> entities(entities_arr, entities_arr + (sizeof(entities_arr) / sizeof(entities_arr[0])));
-    std::sort(entities.begin(), entities.end());
-    
+
+    std::sort(floors.begin(), floors.end());
 }
 
 int GameEngine::startGame(){
@@ -78,13 +69,15 @@ int GameEngine::startGame(){
         window->clear();
         for (Floor& f : floors){
             f.move(pos_delta);
+            window->render(&f);
+        }
+        order_agents();
+        for (Agent* f : agents){
+            if (dynamic_cast<Player*>(f) == nullptr){
+                f->move(pos_delta);
+            }
             window->render(f);
         }
-        for (Agent& f : agents){
-            f.move(pos_delta);
-            window->render(f);
-        }
-        window->render(*player);
         window->display();
     }
     window->cleanUp();
@@ -165,6 +158,19 @@ void GameEngine::refresh_timing(int* startTicks, float* newTime, float* currentT
     *accumulator += *frameTime;
 }
 
+void GameEngine::order_agents(){
+    int j;
+    Agent* key;
+    for (int i = 1; i < agents.size(); ++i) {
+        key = agents[i];
+        j = i - 1;
+        while (j >= 0 && key->getPos()->y < agents[j]->getPos()->y) {
+            agents[j + 1] = agents[j];
+            --j;
+        }
+        agents[j + 1] = key;
+    }
+}
 
 bool GameEngine::check_valid_move(Vector2f direction){
     SDL_Rect adjustedRect = {

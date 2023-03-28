@@ -54,10 +54,70 @@ void Agent::get_adjusted_rect(Vector2f* direction){
 
 // Floor:
 
+Floor::Floor(SDL_Texture* p_texture, FloorType p_fType, AttachmentPoint p_attachSide, Floor* parent): Entity(Vector2f(0.0, 0.0), p_texture), fType(p_fType){
+    
+    Entity::move(calc_position(parent, p_attachSide, AP_NULL));
+}
+
+Floor::Floor(SDL_Texture* p_texture, FloorType p_fType, AttachmentPoint p_attachSide, AttachmentPoint p_attachPoint, Floor* parent):Entity(Vector2f(0.0, 0.0), p_texture), fType(p_fType){
+    Entity::move(calc_position(parent, p_attachSide, p_attachPoint));
+}
+
+Vector2f Floor::calc_position(Floor* parent, AttachmentPoint p_attachSide, AttachmentPoint p_attachPoint){
+    float x, y;
+    Vector2f* parent_pos = parent->getPos();
+    SDL_Rect* parent_rect = parent->getRect();
+    switch (p_attachSide){
+        case AP_RIGHT:
+            x = parent_pos->x + parent_rect->w;
+            y = parent_pos->y + (parent_rect->h / 2.0) - (getRect()->h / 2);
+            if (parent->is_vertical()){
+                x-= 2;
+            }
+            break;
+        case AP_LEFT:
+            x = parent_pos->x - getRect()->w;
+            y = parent_pos->y + (parent_rect->h / 2.0) - (getRect()->h / 2);
+            if (parent->is_vertical()){
+                x += 5;
+            }
+            break;
+        case AP_TOP:
+            x = parent_pos-> x + (parent_rect->w / 2.0) - (getRect()->w / 2.0);
+            y = parent_pos-> y - getRect()->h + 20;
+            if (is_vertical() && !parent->is_vertical()){
+                x -= 4;
+            }
+            break;
+        case AP_BOTTOM:
+            x = parent_pos-> x + (parent_rect->w / 2.0) - (getRect()->w / 2.0);
+            y = parent_pos-> y + parent_rect->h - 20;
+            if (is_vertical() && !parent->is_vertical()){
+                x -= 4;
+            }
+            break;
+        default:
+            x = 0.0;
+            y = 0.0;
+    };
+    switch (p_attachPoint){
+        case AP_TOP:
+            y = parent_pos->y; 
+        case AP_BOTTOM:
+            y = parent_pos->y+ parent_rect->h - getRect()->h;
+            break; 
+        case AP_LEFT:
+            break;
+        case AP_RIGHT:
+            break;
+    }
+    return Vector2f(x, y);
+}
+
 bool Floor::check_collision(SDL_Rect* adj_player){
     
     
-    SDL_Rect floorRec = {(int)getPos()->x + x_mod(), (int)getPos()->y - y_mod(), getRect()->w, getRect()->h};
+    SDL_Rect floorRec = {(int)getPos()->x + 3, (int)getPos()->y - 20, getRect()->w, getRect()->h};
 
     // printf("Check collision\n");
 
@@ -75,10 +135,6 @@ bool Floor::check_collision(SDL_Rect* adj_player){
     }
 
     return true;
-}
-
-bool Floor::operator < (Floor& f){
-    return f.getPos()->y > Entity::getPos()->y;
 }
 
 
@@ -144,8 +200,18 @@ int Floor::x_mod(){
 
 int Floor::y_mod(){
     switch (fType){
+        
         default:
             return 20;
     }
     return 0;
+}
+
+bool Floor::is_vertical(){
+    return fType == FT_V_HALL || fType == FT_V_HALL_TOP || fType == FT_V_HALL_BOTTOM;
+                
+}
+
+bool Floor::is_horizontal(){
+    return fType == FT_H_HALL || fType == FT_H_HALL_LEFT || fType == FT_H_HALL_RIGHT;
 }

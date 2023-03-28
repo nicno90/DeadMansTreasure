@@ -25,6 +25,10 @@ SDL_Texture* RenderWindow::loadTexture(const char* p_filePath){
     return texture;
 }
 
+void RenderWindow::setIcon(SDL_Surface* icon){
+    SDL_SetWindowIcon(window, icon);
+}
+
 void RenderWindow::cleanUp(){
     SDL_DestroyWindow(window);
 }
@@ -33,20 +37,20 @@ void RenderWindow::clear(){
     SDL_RenderClear(renderer);
 }
 
-void RenderWindow::render(Entity& p_entity){
+void RenderWindow::render(Entity* p_entity){
     SDL_Rect img_src;
-    img_src.x = p_entity.getCurrentFrame().x;
-    img_src.y = p_entity.getCurrentFrame().y;
-    img_src.w = p_entity.getCurrentFrame().w;
-    img_src.h = p_entity.getCurrentFrame().h;
+    img_src.x = p_entity->getCurrentFrame().x;
+    img_src.y = p_entity->getCurrentFrame().y;
+    img_src.w = p_entity->getCurrentFrame().w;
+    img_src.h = p_entity->getCurrentFrame().h;
 
     SDL_Rect img_dst;
-    img_dst.x = p_entity.getPos()->x;
-    img_dst.y = p_entity.getPos()->y;
-    img_dst.w = p_entity.getCurrentFrame().w;
-    img_dst.h = p_entity.getCurrentFrame().h;
+    img_dst.x = p_entity->getPos()->x;
+    img_dst.y = p_entity->getPos()->y;
+    img_dst.w = p_entity->getCurrentFrame().w;
+    img_dst.h = p_entity->getCurrentFrame().h;
 
-    SDL_RenderCopy(renderer, p_entity.getTexture(), &img_src, &img_dst);
+    SDL_RenderCopy(renderer, p_entity->getTexture(), &img_src, &img_dst);
 }
 
 void RenderWindow::display(){
