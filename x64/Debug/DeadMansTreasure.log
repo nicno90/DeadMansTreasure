@@ -1,0 +1,26 @@
+﻿  engine.cpp
+C:\Users\Nellie\DeadMansTreasure\Utils.hpp(7,17): warning C4244: 'initializing': conversion from 'Uint32' to 'float', possible loss of data
+  entity.cpp
+C:\Users\Nellie\DeadMansTreasure\entity.cpp(82,68): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Nellie\DeadMansTreasure\entity.cpp(89,68): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Nellie\DeadMansTreasure\entity.cpp(95,71): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Nellie\DeadMansTreasure\entity.cpp(102,71): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Nellie\DeadMansTreasure\entity.cpp(111,8): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Nellie\DeadMansTreasure\entity.cpp(112,8): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Nellie\DeadMansTreasure\entity.cpp(236,2): warning C4065: switch statement contains 'default' but no 'case' labels
+  game_map.cpp
+C:\Users\Nellie\DeadMansTreasure\Utils.hpp(7,17): warning C4244: 'initializing': conversion from 'Uint32' to 'float', possible loss of data
+C:\Users\Nellie\DeadMansTreasure\game_map.cpp(32,24): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+C:\Users\Nellie\DeadMansTreasure\game_map.cpp(44,11): warning C4244: 'initializing': conversion from 'time_t' to 'int', possible loss of data
+  main.cpp
+C:\Users\Nellie\DeadMansTreasure\Utils.hpp(7,17): warning C4244: 'initializing': conversion from 'Uint32' to 'float', possible loss of data
+  math.cpp
+  renderwindow.cpp
+C:\Users\Nellie\DeadMansTreasure\renderwindow.cpp(48,35): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Nellie\DeadMansTreasure\renderwindow.cpp(49,35): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+  Generating Code...
+  DeadMansTreasure.vcxproj -> C:\Users\Nellie\DeadMansTreasure\x64\Debug\DeadMansTreasure.exe

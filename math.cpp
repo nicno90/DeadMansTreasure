@@ -20,7 +20,12 @@ void Vector2f::neg_adjust(Vector2f p_v){
     y -= p_v.y;
 }
 
+Vector2f Vector2f::scale(float mod) {
+    return Vector2f(x * mod, y * mod);
+}
+
 void Vector2f::reset(){
     x = 0;
     y = 0;
 }
+
