@@ -1,2 +1,2 @@
 # DeadMansTreasure
-A game
+A Dongeon explorer with a procedurally generated map.
