@@ -19,12 +19,12 @@ GameMap::~GameMap() {
 
 void GameMap::init_map(SDL_Texture** p_textures) {
 	matrix = {
-		{0.0, 0.24, 0.24, 0.24, 0.24, 0.4}, // B
-		{0.15, 0.34, 0.0, 0.25, 0.25, 0.01}, // ^
-		{0.15, 0.0, 0.34, 0.25, 0.25, 0.01}, // v
-		{0.15, 0.25, 0.25, 0.34, 0.0, 0.01}, // <
-		{0.15, 0.25, 0.25, 0.0, 0.34, 0.01}, // >
-		{0.5, 0.1, 0.1, 0.1, 0.1, 0.1}, // e
+		{0.0, 0.24, 0.24, 0.24, 0.24, 0.04}, // B
+		{0.24, 0.25, 0.0, 0.25, 0.25, 0.01}, // ^
+		{0.24, 0.0, 0.25, 0.25, 0.25, 0.01}, // v
+		{0.24, 0.25, 0.25, 0.25, 0.0, 0.01}, // <
+		{0.24, 0.25, 0.25, 0.0, 0.25, 0.01}, // >
+		{0.0, 0.25, 0.25, 0.25, 0.25, 0.0}, // e
 	};
 
 	float sum;
@@ -34,6 +34,7 @@ void GameMap::init_map(SDL_Texture** p_textures) {
 	}
 	textures = p_textures;
 	homeBase = Floor(Vector2f(350, 250), *(textures + T_BIG_OPENING), FT_BIG_AREA, PT_AREA);
+	std::cout << "\n&homebase: " << &homeBase << std::endl;
 	floors = { &homeBase };
 }
 
@@ -42,58 +43,107 @@ void GameMap::add_path() {
 	paths.push_back(new MapPath(textures, &homeBase));
 	MapPath* current_path = paths.back();
 	int seed = time(NULL);
+	printf("\n\nNew Path:\n");
 	std::cout << "Seed: " << seed << std::endl;
 	srand(seed);
 	double randNum = (double) rand() / RAND_MAX;
 	double sum = 0.0;
-	bool invalid_path[PT_END] = { false };
-	//floors.push_back(current_path->add_floor((PathType) PT_RIGHT));
-	//return;
+	bool invalid_path[PT_END+1] = { false };
+	int minLen = 50, maxLen = 200, size = 0;
+	
 	Floor* f;
 	
 	for (int i = 0; i < matrix.size(); ++i) {
-
 		sum += matrix[current_path->lastPathType()][i];
 		if (!invalid_path[i] && randNum < sum) {
 			
-			if (i == PT_END){
+			if (i == PT_END || size >= maxLen){
 				// current_path->add_floor((PathType)i);
+				if (size < minLen) {
+					i = -1;
+					sum = 0.0;
+					randNum = (double)rand() / RAND_MAX;
+					std::cout << "New Rand: " << randNum << std::endl;
+					continue;
+				}
+				std::cout << "Found end" << std::endl;
 				current_path->fix_last_floor();
 				return;
 			}
 			f = current_path->make_floor((PathType)i);
 			
-			for (int j = 0; j < sizeof(invalid_path); j++) {
-				std::cout << invalid_path[j] <<  " ";
-			}
-			std::cout <<  std::endl;
 			if (valid_placement(f)) {
 				floors.push_back(f);
 				current_path->attach_floor(f);
+				std::cout << "--valid--" << std::endl;
+				std::cout << "Adding: " << f << std::endl;
+				size++;
 
-				for (int j = 0; j < sizeof(invalid_path); j++) {
+
+				// print valid array
+				std::cout << "[ ";
+				for (int j = 0; j < PT_END; ++j) {
+					std::cout << invalid_path[j] << ", ";
 					matrix[i][j] != 0.0 ? invalid_path[j] = false : invalid_path[j] = true;
 				}
+				
+				invalid_path[PT_END - 1] = size < minLen;
+				std::cout << invalid_path[PT_END] << " ]\n\n" << std::endl;
 
 			}
 			else {
+				if (i == PT_DOWN || i == PT_UP) {
+					printf("floor: {%d, %d, %d, %d}\n", f->get_hitbox()->x, f->get_hitbox()->y, f->get_hitbox()->w, f->get_hitbox()->h);
+				}
+
 				invalid_path[i] = true;
 				delete f;
 			}
+			
 			i = -1;
-			sum = 0;
+			sum = 0.0;
 			randNum = (double) rand() / RAND_MAX;
+			std::cout << "New Rand: " << randNum << std::endl;
+			
+		}
+		else if (i == matrix.size()-1 && size < minLen) {
+			//for (bool& invld_pth : invalid_path) {
+			for (int j = 0; j < PT_END-1; ++j) {
+				if (!invalid_path[j]) {
+					i = -1;
+					sum = 0.0;
+					randNum = (double)rand() / RAND_MAX;
+					std::cout << "\nNew Rand: " << randNum << std::endl;
+					return;
+				}
+			}
+			std::cout << "No Valid Path Forward\n" << std::endl;
+			current_path->fix_last_floor();
 		}
 	}
 
-	std::cout << "found way out of loop\nsum: " << sum << "\n" << std::endl;
+	std::cout << "found way out of loop\nsum: " << sum << "\nsize: "<< size << "\n" << std::endl;
 }
 
-bool GameMap::valid_placement(Floor* f) {
-	SDL_Rect floorRec = { (int)f->getPos()->x, (int)f->getPos()->y - 25, f->getRect()->w, f->getRect()->h };
-	for (Floor* f : floors) {
+bool GameMap::valid_placement(Floor* p_f) {
+	SDL_Rect floorRec;
+	int xmod = 0, ymod = 0;
+	if (p_f->getPtype() == PT_DOWN) {
+		ymod = 20;
+	}
+	else if (p_f->getPtype() == PT_UP) {
+		ymod = -60;
+	}
 
-		if (f->floor_collision(&floorRec)) {
+	floorRec = { (int)p_f->getPos()->x+xmod, (int)p_f->getPos()->y+ymod, p_f->getRect()->w, p_f->getRect()->h };
+
+	for (Floor* floor : floors) {
+		
+		
+		if (floor->floor_collision(&floorRec)) {
+			// printf("downHall y, bottom y: %d, %d\n", (int)floorRec.y, (int)floor->getPos()->y + floor->getRect()->h);
+			std::cout << "Invalid from pType:" << floor->getPtype() << ", &id:" << floor << std::endl;
+
 			return false;
 		}
 	}
@@ -149,23 +199,23 @@ void MapPath::getAttachmentPoint(PathType pType, AttachmentPoint* attachSide, At
 	case PT_UP:
 		switch (pType) {
 		case PT_UP:
-			std::cout << " up ";
+			std::cout << " UP ";
 			*attachSide = AP_TOP;
 			break;
 		case PT_LEFT:
-			std::cout << " left ";
+			std::cout << " LEFT ";
 			*attachSide = AP_LEFT;
 			*attachPoint = AP_TOP;
 			//lastFloor->set_fType(FT_V_HALL_TOP);
 			break;
 		case PT_RIGHT:
-			std::cout << " right ";
+			std::cout << " RIGHT ";
 			*attachSide = AP_RIGHT;
 			*attachPoint = AP_TOP;
 			//lastFloor->set_fType(FT_V_HALL_TOP);
 			break;
 		case PT_AREA:
-			std::cout << " area ";
+			std::cout << " AREA ";
 			*attachSide = AP_TOP;
 			break;
 		case PT_END:
@@ -177,23 +227,23 @@ void MapPath::getAttachmentPoint(PathType pType, AttachmentPoint* attachSide, At
 	case PT_DOWN:
 		switch (pType) {
 		case PT_DOWN:
-			std::cout << " down ";
+			std::cout << " DOWN ";
 			*attachSide = AP_BOTTOM;
 			break;
 		case PT_LEFT:
-			std::cout << " left ";
+			std::cout << " LEFT ";
 			*attachSide = AP_LEFT;
 			*attachPoint = AP_BOTTOM;
 			//lastFloor->set_fType(FT_V_HALL_BOTTOM);
 			break;
 		case PT_RIGHT:
-			std::cout << " right ";
+			std::cout << " RIGHT ";
 			*attachSide = AP_RIGHT;
 			*attachPoint = AP_BOTTOM;
 			//lastFloor->set_fType(FT_V_HALL_BOTTOM);
 			break;
 		case PT_AREA:
-			std::cout << " area ";
+			std::cout << " AREA ";
 			*attachSide = AP_BOTTOM;
 			//lastFloor->set_fType(FT_V_HALL_BOTTOM);
 			break;
@@ -206,23 +256,23 @@ void MapPath::getAttachmentPoint(PathType pType, AttachmentPoint* attachSide, At
 	case PT_LEFT:
 		switch (pType) {
 		case PT_UP:
-			std::cout << " up ";
+			std::cout << " UP ";
 			*attachSide = AP_TOP;
 			*attachPoint = AP_LEFT;
 			//lastFloor->set_fType(FT_H_HALL_LEFT);
 			break;
 		case PT_DOWN:
-			std::cout << " down ";
+			std::cout << " DOWN ";
 			*attachSide = AP_BOTTOM;
 			*attachPoint = AP_LEFT;
 			//lastFloor->set_fType(FT_H_HALL_LEFT);
 			break;
 		case PT_LEFT:
-			std::cout << " left ";
+			std::cout << " LEFT ";
 			*attachSide = AP_LEFT;
 			break;
 		case PT_AREA:
-			std::cout << " area ";
+			std::cout << " AREA ";
 			*attachSide = AP_LEFT;
 			break;
 		case PT_END:
@@ -234,23 +284,23 @@ void MapPath::getAttachmentPoint(PathType pType, AttachmentPoint* attachSide, At
 	case PT_RIGHT:
 		switch (pType) {
 		case PT_UP:
-			std::cout << " up ";
+			std::cout << " UP ";
 			*attachSide = AP_TOP;
 			*attachPoint = AP_RIGHT;
 			//lastFloor->set_fType(FT_H_HALL_RIGHT);
 			break;
 		case PT_DOWN:
-			std::cout << " down ";
+			std::cout << " DOWN ";
 			*attachSide = AP_BOTTOM;
 			*attachPoint = AP_RIGHT;
 			//lastFloor->set_fType(FT_H_HALL_RIGHT);
 			break;
 		case PT_RIGHT:
-			std::cout << " right ";
+			std::cout << " RIGHT ";
 			*attachSide = AP_RIGHT;
 			break;
 		case PT_AREA:
-			std::cout << " area ";
+			std::cout << " AREA ";
 			*attachSide = AP_RIGHT;
 			break;
 		case PT_END:
@@ -262,19 +312,19 @@ void MapPath::getAttachmentPoint(PathType pType, AttachmentPoint* attachSide, At
 	case PT_AREA:
 		switch (pType) {
 		case PT_UP:
-			std::cout << " up ";
+			std::cout << " UP ";
 			*attachSide = AP_TOP;
 			break;
 		case PT_DOWN:
-			std::cout << " down ";
+			std::cout << " DOWN ";
 			*attachSide = AP_BOTTOM;
 			break;
 		case PT_LEFT:
-			std::cout << " left ";
+			std::cout << " LEFT ";
 			*attachSide = AP_LEFT;
 			break;
 		case PT_RIGHT:
-			std::cout << " right ";
+			std::cout << " RIGHT ";
 			*attachSide = AP_RIGHT;
 			break;
 		}
@@ -286,7 +336,6 @@ Floor* MapPath::make_floor(PathType pType) {
 	AttachmentPoint attachSide, attachPoint;
 	// std::cout << "Last floor type: " << lastFloor->getType() << std::endl;
 	getAttachmentPoint(pType, &attachSide, &attachPoint);
-	std::cout << pType << ": " << lastFloor->getPtype() << std::endl;
 	
 	return new Floor(*(textures + fType_texture(pType_fType(pType))), pType_fType(pType), pType, attachSide, attachPoint, lastFloor);
 

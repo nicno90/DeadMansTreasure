@@ -1,3 +1,4 @@
 *.exe
 .vs/*
+x64/Debug/*
 Debug/*

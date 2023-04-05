@@ -117,6 +117,9 @@ bool GameEngine::readInput(SDL_Event* windowEvent){
 			case SDLK_LSHIFT:
 				setKey(K_SHIFT, windowEvent);
 				break;
+			case SDLK_SPACE:
+				setKey(K_SPACE, windowEvent);
+				break;
 			case SDLK_ESCAPE:
 				setKey(K_ESC, windowEvent);
 				return false;
@@ -137,18 +140,18 @@ void GameEngine::check_movement(Vector2f* pos_delta){
 	pos_delta->reset();
 	float speed = 1.0;
 	if (inputs_pressed[K_SHIFT]) {
-		speed = 1.5;
+		speed = 2;
 	}
-	if (inputs_pressed[K_UP] && check_valid_move(directions[K_UP])) {
+	if (inputs_pressed[K_UP] && (check_valid_move(directions[K_UP]) || inputs_pressed[K_SPACE])) {
 		pos_delta->adjust(directions[K_UP].scale(speed));
 	}
-	if (inputs_pressed[K_DOWN] && check_valid_move(directions[K_DOWN])){
+	if (inputs_pressed[K_DOWN] && (check_valid_move(directions[K_DOWN]) || inputs_pressed[K_SPACE])){
 		pos_delta->adjust(directions[K_DOWN].scale(speed));
 	}
-	if (inputs_pressed[K_LEFT] && check_valid_move(directions[K_LEFT])){
+	if (inputs_pressed[K_LEFT] && (check_valid_move(directions[K_LEFT]) || inputs_pressed[K_SPACE])){
 		pos_delta->adjust(directions[K_LEFT].scale(speed));
 	}
-	if (inputs_pressed[K_RIGHT] && check_valid_move(directions[K_RIGHT])){
+	if (inputs_pressed[K_RIGHT] && (check_valid_move(directions[K_RIGHT]) || inputs_pressed[K_SPACE])){
 		pos_delta->adjust(directions[K_RIGHT].scale(speed));
 	}
 	if (inputs_pressed[K_ESC]) {
@@ -180,14 +183,18 @@ void GameEngine::order_agents(){
 
 bool GameEngine::check_valid_move(Vector2f direction){
 	SDL_Rect adjustedRect = {
-		(int)(player->getPos()->x - (direction.x) + 8), (int)(player->getPos()->y - (direction.y)), 
-		player->getRect()->w - 8, player->getRect()->h
+		(int)(player->get_hitbox()->x - (direction.x) + 8), (int)(player->get_hitbox()->y - (direction.y)),
+		player->get_hitbox()->w, player->get_hitbox()->h
 	};
 	for (Floor* f : map.getFloors())
 	{
-		if (f->check_collision(&adjustedRect))
-		{
+		if (f->check_collision(&adjustedRect)){
+			//printf("in floor: {%d, %d, %d, %d}\n", f->get_hitbox()->x, f->get_hitbox()->y, f->get_hitbox()->w, f->get_hitbox()->h);
 			return true;
+		}
+		if (SDL_HasIntersection(f->get_hitbox(), &adjustedRect)) {
+			//printf("Player: {%d, %d, %d, %d}\n", adjustedRect.x, adjustedRect.y, adjustedRect.w, adjustedRect.h);
+			//printf("floor: {%d, %d, %d, %d}\n", f->get_hitbox()->x, f->get_hitbox()->y, f->get_hitbox()->w, f->get_hitbox()->h);
 		}
 	}
 	return false;

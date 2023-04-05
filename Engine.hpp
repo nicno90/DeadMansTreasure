@@ -22,6 +22,7 @@ enum keyPressed {
     K_A,
     K_D,
     K_SHIFT,
+    K_SPACE,
     
     K_LAST
 };

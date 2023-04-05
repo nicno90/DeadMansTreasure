@@ -1,4 +1,5 @@
 #include <iostream>
+#include <SDL_ttf.h>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <vector>
@@ -19,6 +20,9 @@ int main(int argc, char *argv[]){
 
     if (!IMG_Init(IMG_INIT_PNG))
         std::cout << "IMG_Init failed. ERROR: " << SDL_GetError() << std::endl;
+    if (TTF_Init() == -1)
+        std::cout << "TTF_Init failed. ERROR: " << SDL_GetError() << std::endl;
+    
     RenderWindow window = RenderWindow("Dead Man's Treasure", WIDTH, HEIGHT);
     window.setIcon(IMG_Load("res/images/chest.png"));
     

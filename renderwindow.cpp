@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <iostream>
 #include "RenderWindow.hpp"
 #include "Entity.hpp"
@@ -51,6 +52,10 @@ void RenderWindow::render(Entity* p_entity){
     img_dst.h = p_entity->getCurrentFrame().h;
 
     SDL_RenderCopy(renderer, p_entity->getTexture(), &img_src, &img_dst);
+    SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer, p_entity->getText());
+    SDL_Rect text_dst = { img_dst.x, img_dst.y, 0, 0};
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_dst);
+
 }
 
 void RenderWindow::display(){
