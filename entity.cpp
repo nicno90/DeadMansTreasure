@@ -80,7 +80,9 @@ Floor::Floor(SDL_Texture* p_texture, FloorType p_fType, PathType p_pType, Attach
 	else {
 		Entity::move(calc_position(parent, p_attachSide, p_attachPoint));
 	}
-	Entity::adjust_hitbox(0, -20, 0, 0);
+	if (p_pType != PT_UP) {
+		Entity::adjust_hitbox(0, -20, 0, 0);
+	}
 }
 
 Vector2f Floor::calc_position(Floor* parent, AttachmentPoint p_attachSide, AttachmentPoint p_attachPoint){
@@ -104,7 +106,7 @@ Vector2f Floor::calc_position(Floor* parent, AttachmentPoint p_attachSide, Attac
 		break;
 	case AP_TOP:
 		x = parent_pos->x + (parent_rect->w / 2.0) - (getRect()->w / 2.0) + x_mod;
-		y = parent_pos->y - getRect()->h + 20 + y_mod;
+		y = parent_pos->y - getRect()->h + y_mod;
 		
 		break;
 	case AP_BOTTOM:
@@ -165,6 +167,9 @@ bool Floor::floor_collision(SDL_Rect* adj_floor) {
 	SDL_Rect floorRect = { (int)get_hitbox()->x, (int)get_hitbox()->y, get_hitbox()->w, get_hitbox()->h };
 	
 	if (SDL_HasIntersection(&floorRect, adj_floor)) {
+		if (pType == PT_CORNER_TL || pType == PT_CORNER_TR) {
+			printf("");
+		}
 		return true;
 	}
 	return false;

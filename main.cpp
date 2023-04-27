@@ -10,7 +10,7 @@
 #include "Math.hpp"
 #include "Utils.hpp"
 
-const int WIDTH = 800, HEIGHT = 600;
+const int WIDTH = 1000, HEIGHT = 800;
 
 
 

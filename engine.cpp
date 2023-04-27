@@ -28,8 +28,7 @@ GameEngine::GameEngine(RenderWindow* p_window, Player* p_player)
 	};
 
 	// put this back when working
-	map.add_path();
-	map.add_path();
+	map.generate();
 	std::cout << "size2: " << map.getFloors().size() << std::endl;
    
 }
@@ -84,11 +83,17 @@ void GameEngine::init_textures(){
 	textures[T_KNIGHT] = player->getTexture();
 	textures[T_BIG_OPENING] = window->loadTexture("res/images/big_opening.png");
 	textures[T_VERTICAL_PATH] = window->loadTexture("res/images/vertical_path.png");
+	textures[T_VERTICAL_UP] = window->loadTexture("res/images/vertical_path_up.png");
+	textures[T_VERTICAL_DOWN] = window->loadTexture("res/images/vertical_path_down.png");
 	textures[T_VIKING] = window->loadTexture("res/images/viking.png");
 	textures[T_CHEST] = window->loadTexture("res/images/chest.png");
 	textures[T_HORIZONTAL_PATH] = window->loadTexture("res/images/horizontal_path.png");
+	textures[T_HORIZONTAL_LEFT] = window->loadTexture("res/images/horizontal_path_left.png");
+	textures[T_HORIZONTAL_RIGHT] = window->loadTexture("res/images/horizontal_path_right.png");
 	textures[T_BL_CORNER] = window->loadTexture("res/images/bl_corner.png");
 	textures[T_TL_CORNER] = window->loadTexture("res/images/tl_corner.png");
+	textures[T_BR_CORNER] = window->loadTexture("res/images/br_corner.png");
+	textures[T_TR_CORNER] = window->loadTexture("res/images/tr_corner.png");
 	}
 
 void GameEngine::init_directions(){
@@ -192,10 +197,7 @@ bool GameEngine::check_valid_move(Vector2f direction){
 			//printf("in floor: {%d, %d, %d, %d}\n", f->get_hitbox()->x, f->get_hitbox()->y, f->get_hitbox()->w, f->get_hitbox()->h);
 			return true;
 		}
-		if (SDL_HasIntersection(f->get_hitbox(), &adjustedRect)) {
-			//printf("Player: {%d, %d, %d, %d}\n", adjustedRect.x, adjustedRect.y, adjustedRect.w, adjustedRect.h);
-			//printf("floor: {%d, %d, %d, %d}\n", f->get_hitbox()->x, f->get_hitbox()->y, f->get_hitbox()->w, f->get_hitbox()->h);
-		}
+
 	}
 	return false;
 }
